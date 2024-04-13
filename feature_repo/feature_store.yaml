@@ -1,0 +1,16 @@
+project: credit_scoring_aws
+registry: registry.db
+provider: aws
+online_store:
+    type: redis
+    redis_type: redis_cluster
+    connection_string: <put your redis cache endpoint here>
+entity_key_serialization_version: 2
+offline_store:
+    type: redshift
+    cluster_id: demo-feast-project-aws-redshift-cluster
+    region: us-west-2
+    user: admin
+    database: dev
+    s3_staging_location: s3://demo-feast-project-aws-bucket/*
+    iam_role: arn:aws:iam::<enter-your-account-id>:role/s3_spectrum_role
