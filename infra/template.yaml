@@ -1,0 +1,252 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates infrastructure for feature store
+
+Parameters:
+  pProjectName:
+    Type: String
+    Default: "demo-feast-project-aws-test"
+    Description: "The project identifier is used to uniquely namespace resources"
+
+  pDatabaseName:
+    Type: String
+    Default: "dev"
+    Description: "The name of the first database to be created when the cluster is created"
+
+  pAdminUser:
+    Type: String
+    Default: "admin"
+    Description: "(Required unless a snapshot_identifier is provided) Username for the master DB user"
+
+  pAdminPassword:
+    Description: "(Required unless a snapshot_identifier is provided) Password for the master DB user"
+    Type: String
+    NoEcho: true
+
+  pNodeType:
+    Type: String
+    Default: "dc2.large"
+    AllowedValues:
+      - dc2.large
+      - dc2.8xlarge
+    Description: "The node type to be provisioned for the cluster. See https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-clusters.html#working-with-clusters-overview"
+
+  pClusterType:
+    Type: String
+    Default: "single-node"
+    AllowedValues:
+      - single-node
+      - multi-node
+    Description: "The cluster type to use. Either `single-node` or `multi-node`"
+
+  pNode:
+    Type: Number
+    Default: 1
+    Description: "The number of compute nodes in the cluster. This parameter is required when the ClusterType parameter is specified as multi-node"
+
+Resources:
+  FeastS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${pProjectName}-bucket"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              KMSMasterKeyID: KMS-KEY-ARN
+
+
+  S3BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket:
+        !Ref FeastS3Bucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Sid: AllowConnections
+            Effect: Allow
+            Principal: 
+              AWS:
+                - !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: 
+              - s3:PutObject
+              - s3:GetObject
+              - s3:PutObjectAcl
+            Resource:
+              - !Sub arn:aws:s3:::${FeastS3Bucket}/*
+
+  S3SpectrumRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "s3_spectrum_role"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - redshift.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Ref SampleManagedPolicy
+
+  SampleManagedPolicy:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: "ManagedPolicy"
+            Effect: Allow
+            Action:
+              - 'iam:AWSServiceRoleForRedshift'
+              - 'iam:AWSGlueConsoleFullAccess'
+              - 'iam:AmazonS3FullAccess'
+            Resource: !Sub arn:aws:redshift:${AWS::Region}:${AWS::AccountId}:namespace:*
+
+  FeastRedshiftCluster:
+    Type: AWS::Redshift::Cluster
+    Properties:
+      AllowVersionUpgrade: true
+      AutomatedSnapshotRetentionPeriod: 1
+      ClusterIdentifier: !Sub "${pProjectName}-redshift-cluster"
+      ClusterType: !Ref pClusterType
+      DBName: !Ref pDatabaseName
+      Encrypted: true
+      MasterUsername: !Ref pAdminUser
+      MasterUserPassword: !Ref pAdminPassword
+      NodeType: !Ref pNodeType
+      PubliclyAccessible: false
+      IamRoles: 
+        - !GetAtt S3SpectrumRole.Arn
+      
+  RedisEngine:
+    Type: AWS::ElastiCache::ServerlessCache
+    Properties:
+      ServerlessCacheName: "ec-featurestore-cache"
+      Engine: redis
+
+
+  GlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      DatabaseInput:
+        Name: !Ref pDatabaseName
+      CatalogId: !Ref AWS::AccountId
+
+  ZipcodeFeatureTable:
+    Type: AWS::Glue::Table
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName:
+        !Ref GlueDatabase
+      TableInput:
+        Name: "zipcode_features"
+        TableType: EXTERNAL_TABLE
+        Parameters: {
+          "EXTERNAL": "TRUE",
+          parquet.compression: "SNAPPY"
+        }
+        StorageDescriptor:
+          Columns:
+            - Name: zipcode
+              Type: BIGINT
+            - Name: city
+              Type: VARCHAR(128)
+            - Name: state
+              Type: VARCHAR(128)
+            - Name: location_type
+              Type: VARCHAR(128)
+            - Name: tax_returns_filed
+              Type: BIGINT
+            - Name: population
+              Type: BIGINT
+            - Name: total_wages
+              Type: BIGINT
+            - Name: event_timestamp
+              Type: timestamp
+            - Name: created_timestamp
+              Type: timestamp
+          Location:
+            !Sub "s3://${FeastS3Bucket}/zipcode_features/"
+          InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+          OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+          SerdeInfo:
+            Name: "my-stream"
+            SerializationLibrary: "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
+            Parameters: {
+              "serialization.format": "1"
+            }
+            
+  CreditHistoryTable:
+    Type: AWS::Glue::Table
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseName:
+        !Ref GlueDatabase
+      TableInput:
+        Name: "credit_history"
+        TableType: EXTERNAL_TABLE
+        Parameters: {
+          "EXTERNAL": "TRUE",
+          parquet.compression: "SNAPPY"
+        }
+        StorageDescriptor:
+          Columns:
+            - Name: dob_ssn
+              Type: VARCHAR(13)
+            - Name: credit_card_due
+              Type: BIGINT
+            - Name: mortgage_due
+              Type: BIGINT
+            - Name: student_loan_due
+              Type: BIGINT
+            - Name: vehicle_loan_due
+              Type: BIGINT
+            - Name: hard_pulls
+              Type: BIGINT
+            - Name: missed_payments_2y
+              Type: BIGINT
+            - Name: missed_payments_1y
+              Type: BIGINT
+            - Name: missed_payments_6m
+              Type: BIGINT
+            - Name: bankruptcies
+              Type: BIGINT
+            - Name: event_timestamp
+              Type: timestamp
+            - Name: created_timestamp
+              Type: timestamp
+          Location:
+            !Sub "s3://${FeastS3Bucket}/zipcode_features/"
+          InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+          OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+          SerdeInfo:
+            Name: "my-stream"
+            SerializationLibrary: "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
+            Parameters: {
+              "serialization.format": "1"
+            }
+
+Outputs:
+  RedshiftClusterIdentifier:
+    Description: The name of the Redshift cluster
+    Value: !Ref FeastRedshiftCluster
+
+  RedshiftSpectrumArn:
+    Description: The ARN of the Redshift Spectrum role
+    Value: !GetAtt S3SpectrumRole.Arn
+
+
+  
+
+  
+

@@ -11,7 +11,6 @@ This tutorial demonstrates the use of Feast as part of a real-time credit scorin
 
 ## Requirements
 
-* Terraform (v1.0 or later)
 * AWS CLI (v2.2 or later)
 
 Install project specific dependencies
@@ -20,43 +19,13 @@ pip install -r requirements.txt
 ```
 
 ## Setup
+Run deploy.sh in your terminal. This will spin up the required resources in 'us-west-2' account
 
-### Set up a ElastiCache redis cache(TODO: Set this up with CFN)
-1. Login to your AWS console 
-2. Type ElastiCache -> Create Redis cache
-3. Choose 'Serverless' and give your name
-4. Create
-Once the cache gets created note down the 'Endpoint', we will be needing this later
-
-### Setting up Redshift and S3
-
-First we will set up your data infrastructure to simulate a production environment. We will deploy Redshift, an S3 
-bucket containing our zipcode and credit history parquet files, IAM roles and policies for Redshift to access S3, and create a 
-Redshift table that can query the parquet files. 
-
-Initialize Terraform
 ```
-cd infra
-terraform init
+./deploy.sh
 ```
 
-Make sure the Terraform plan looks good
-```
-terraform plan -var="admin_password=thisISyourPassword1"
-```
-
-Deploy your infrastructure
-```
-terraform apply -var="admin_password=thisISyourPassword1"
-```
-
-Once your infrastructure is deployed, you should see the following outputs from Terraform
-```
-redshift_cluster_identifier = "my-feast-project-redshift-cluster"
-redshift_spectrum_arn = "arn:aws:iam::<Account>:role/s3_spectrum_role"
-credit_history_table = "credit_history"
-zipcode_features_table = "zipcode_features"
-```
+You should see outputs in the cloudformation stack
 
 Next we create a mapping from the Redshift cluster to the external catalog
 ```
