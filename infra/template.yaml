@@ -44,8 +44,48 @@ Parameters:
     Description: "The number of compute nodes in the cluster. This parameter is required when the ClusterType parameter is specified as multi-node"
 
 Resources:
+
+  LoggingBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${pProjectName}-bucket-logs"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              KMSMasterKeyID: KMS-KEY-ARN
+
+  LoggingS3BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket:
+        !Ref LoggingBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Sid: AllowConnections
+            Effect: Allow
+            Principal: 
+              AWS:
+                - !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: 
+              - s3:PutObject
+              - s3:GetObject
+              - s3:PutObjectAcl
+            Resource:
+              - !Sub arn:aws:s3:::${LoggingBucket}/*
+  
   FeastS3Bucket:
     Type: AWS::S3::Bucket
+    DependsOn: LoggingBucket
     Properties:
       BucketName: !Sub "${pProjectName}-bucket"
       PublicAccessBlockConfiguration:
@@ -53,6 +93,11 @@ Resources:
         IgnorePublicAcls: true
         BlockPublicPolicy: true
         RestrictPublicBuckets: true
+      LoggingConfiguration:        
+        DestinationBucketName: !Sub "${pProjectName}-bucket-logs"
+        LogFilePrefix: "access-logs"
+      VersioningConfiguration:
+        Status: Enabled
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -112,6 +157,13 @@ Resources:
               - 'iam:AmazonS3FullAccess'
             Resource: !Sub arn:aws:redshift:${AWS::Region}:${AWS::AccountId}:namespace:*
 
+  FeastRedshiftClusterSubnetGroup:
+    Type: AWS::Redshift::ClusterSubnetGroup
+    Properties:
+      Description: feast-cluster-subnet-group
+      SubnetIds: 
+        - "subnet-05d5b06ce37d2fd0e"
+
   FeastRedshiftCluster:
     Type: AWS::Redshift::Cluster
     Properties:
@@ -125,6 +177,8 @@ Resources:
       MasterUserPassword: !Ref pAdminPassword
       NodeType: !Ref pNodeType
       PubliclyAccessible: false
+      NumberOfNodes: !Ref pNode
+      ClusterSubnetGroupName: !Ref FeastRedshiftClusterSubnetGroup
       IamRoles: 
         - !GetAtt S3SpectrumRole.Arn
       
@@ -245,8 +299,4 @@ Outputs:
     Description: The ARN of the Redshift Spectrum role
     Value: !GetAtt S3SpectrumRole.Arn
 
-
-  
-
-  
 
