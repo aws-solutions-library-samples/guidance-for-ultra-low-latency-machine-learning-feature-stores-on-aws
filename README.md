@@ -114,7 +114,7 @@ cd ..
 ## Train and test the model
 
 Finally, we train the model using a combination of loan data from S3 and our zipcode and credit history features from Redshift
-(which in turn queries S3), and then we test online inference by reading those same features from DynamoDB 
+(which in turn queries S3), and then execute online inferencing by reading those same features from Amazon ElastiCache.  
 
 ```
 python run.py
