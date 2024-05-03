@@ -19,6 +19,8 @@ pip install -r requirements.txt
 ```
 
 ## Setup
+Set the parameters in ```config``` file and then
+
 Run deploy.sh in your terminal. This will spin up the required resources in 'us-west-2' account
 
 ```
