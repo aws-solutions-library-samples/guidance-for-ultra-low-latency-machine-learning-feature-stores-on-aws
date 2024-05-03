@@ -22,6 +22,10 @@ Parameters:
     Type: String
     NoEcho: true
 
+  pRedshiftSubnetGroup: 
+    Type: String
+    Description: "The subnet group where the cluster is deployed."
+
   pNodeType:
     Type: String
     Default: "dc2.large"
@@ -41,7 +45,7 @@ Parameters:
   pNode:
     Type: Number
     Default: 1
-    Description: "The number of compute nodes in the cluster. This parameter is required when the ClusterType parameter is specified as multi-node"
+    Description: "The number of compute nodes in the cluster.This parameter is required when the ClusterType parameter is specified as multi-node"
 
 Resources:
 
@@ -59,8 +63,7 @@ Resources:
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
-              SSEAlgorithm: 'aws:kms'
-              KMSMasterKeyID: KMS-KEY-ARN
+              SSEAlgorithm: 'AES256'
 
   LoggingS3BucketPolicy:
     Type: 'AWS::S3::BucketPolicy'
@@ -71,17 +74,15 @@ Resources:
         Version: 2012-10-17
         Statement:
           -
-            Sid: AllowConnections
             Effect: Allow
             Principal: 
-              AWS:
-                - !Sub arn:aws:iam::${AWS::AccountId}:root
+              Service: redshift.amazonaws.com
             Action: 
+              - s3:GetBucketAcl
               - s3:PutObject
-              - s3:GetObject
-              - s3:PutObjectAcl
             Resource:
-              - !Sub arn:aws:s3:::${LoggingBucket}/*
+              - !Sub '${LoggingBucket.Arn}'
+              - !Sub '${LoggingBucket.Arn}/*'
   
   FeastS3Bucket:
     Type: AWS::S3::Bucket
@@ -94,15 +95,14 @@ Resources:
         BlockPublicPolicy: true
         RestrictPublicBuckets: true
       LoggingConfiguration:        
-        DestinationBucketName: !Sub "${pProjectName}-bucket-logs"
-        LogFilePrefix: "access-logs"
+        DestinationBucketName: !Ref LoggingBucket
+        LogFilePrefix: "access-bucket-logs"
       VersioningConfiguration:
         Status: Enabled
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
-              SSEAlgorithm: 'aws:kms'
-              KMSMasterKeyID: KMS-KEY-ARN
+              SSEAlgorithm: 'AES256'
 
 
   S3BucketPolicy:
@@ -162,7 +162,7 @@ Resources:
     Properties:
       Description: feast-cluster-subnet-group
       SubnetIds: 
-        - "subnet-05d5b06ce37d2fd0e"
+        - !Ref pRedshiftSubnetGroup
 
   FeastRedshiftCluster:
     Type: AWS::Redshift::Cluster
@@ -181,6 +181,9 @@ Resources:
       ClusterSubnetGroupName: !Ref FeastRedshiftClusterSubnetGroup
       IamRoles: 
         - !GetAtt S3SpectrumRole.Arn
+      LoggingProperties:
+        BucketName: !Ref LoggingBucket
+        S3KeyPrefix: "AWSLogs"
       
   RedisEngine:
     Type: AWS::ElastiCache::ServerlessCache
