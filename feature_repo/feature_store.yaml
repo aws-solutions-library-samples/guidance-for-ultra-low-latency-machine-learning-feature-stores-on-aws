@@ -4,7 +4,7 @@ provider: aws
 online_store:
     type: redis
     redis_type: redis_cluster
-    connection_string: <put your redis cache endpoint here>
+    connection_string: <put your redis cache endpoint here with port>,ssl=true
 entity_key_serialization_version: 2
 offline_store:
     type: redshift

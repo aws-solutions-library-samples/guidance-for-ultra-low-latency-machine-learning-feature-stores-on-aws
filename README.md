@@ -64,12 +64,6 @@ cd ..
 
 ### Setting up Feast
 
-Install Feast using pip
-
-```
-pip install 'feast[redis]'
-```
-
 We have already set up a feature repository in [feature_repo/](feature_repo/). It isn't necessary to create a new
 feature repository, but it can be done using the following command
 ```
@@ -78,11 +72,20 @@ feast init -t aws feature_repo # Command only shown for reference.
 
 Since we don't need to `init` a new repository, all we have to do is configure the 
 [feature_store.yaml/](feature_repo/feature_store.yaml) in the feature repository. Please set the fields under `online_store` with the redis endpoint that you got at first step
-Set `offline_store` to the configuration you have received when deploying your Redshift cluster and S3 bucket.
 
-Make sure to update the `offline_store` values like:
+`online_store` values will look like this:
 ```
-    s3_staging_location: s3://demo-feast-project-aws-bucket/*
+    type: redis
+    redis_type: redis_cluster
+    connection_string: ec-featurestore-cache-xxxxxx.serverless.usw2.cache.amazonaws.com:6379,ssl=true
+```
+
+Set `offline_store` to the configuration you have received when deploying your Redshift cluster and S3 bucket(you can get this from the Output section of the Cloudformation template).
+
+ `offline_store` values will look like this:
+```
+    cluster_id: <redshift-cluster-id>
+    s3_staging_location: s3://<demo-feast-project-aws-bucket>/* 
     iam_role: arn:aws:iam::<enter-your-account-id>:role/s3_spectrum_role
 ```
 

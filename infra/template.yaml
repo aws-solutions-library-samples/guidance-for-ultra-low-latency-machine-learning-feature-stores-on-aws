@@ -45,7 +45,7 @@ Parameters:
   pNode:
     Type: Number
     Default: 1
-    Description: "The number of compute nodes in the cluster.This parameter is required when the ClusterType parameter is specified as multi-node"
+    Description: "The number of compute nodes in the cluster. This parameter is required when the ClusterType parameter is specified as multi-node"
 
 Resources:
 
@@ -139,8 +139,9 @@ Resources:
                 - redshift.amazonaws.com
             Action:
               - sts:AssumeRole
-      Path: /
       ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AWSGlueConsoleFullAccess
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonS3ReadOnlyAccess
         - !Ref SampleManagedPolicy
 
   SampleManagedPolicy:
@@ -302,4 +303,6 @@ Outputs:
     Description: The ARN of the Redshift Spectrum role
     Value: !GetAtt S3SpectrumRole.Arn
 
-
+  FeastS3BucketName:
+    Description: The s3 bucket name where the offline feature exist
+    Value: !Ref FeastS3Bucket
