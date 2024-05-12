@@ -19,9 +19,18 @@ pip install -r requirements.txt
 ```
 
 ## Setup
-Set the parameters in ```config``` file and then
+Open a terminal and go to folder ```infra``` by doing
+```
+cd infra
+```
+and complete the setup as explained below:
 
-Run deploy.sh in your terminal. This will spin up the required resources in 'us-west-2' account
+Set the parameters in ```config``` file. There are three parameters you need to set:
+1. EC_FS_STACK: the stack name
+1. SUBNET_ID: The subnet where the redshift cluster will be created 
+1. PROJECT_NAME: Project name is used in naming s3 buckets and redshift cluster. If you get an error that the s3 bucket exists, just change the PROJECT_NAME to be something unique.
+
+Once the config has your values, run deploy.sh in your terminal. This will spin up the required resources in 'us-west-2' account
 
 ```
 ./deploy.sh
