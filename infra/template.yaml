@@ -303,6 +303,10 @@ Outputs:
     Description: The ARN of the Redshift Spectrum role
     Value: !GetAtt S3SpectrumRole.Arn
 
-  FeastS3BucketName:
+  FeastS3BucketUri:
     Description: The s3 bucket name where the offline feature exist
-    Value: !Ref FeastS3Bucket
+    Value: !Join ['', ['s3://', !Ref FeastS3Bucket, '/*']]
+
+  RedisConnectionString:
+    Description: The Redis connection string to be added to feature_store.yaml
+    Value: !Join ['', [ !GetAtt RedisEngine.Endpoint.Address, ':', !GetAtt RedisEngine.Endpoint.Port, ',ssl=true']]

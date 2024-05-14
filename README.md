@@ -2,7 +2,7 @@
 
 ## Overview
 
-![credit-score-architecture@2x](data/architecture.JPG)
+![credit-score-architecture@2x](data/architecture.jpeg)
 
 This tutorial demonstrates the use of Feast as part of a real-time credit scoring application.
 * The primary training dataset is a loan table. This table contains historic loan data with accompanying features. The dataset also contains a target variable, namely whether a user has defaulted on their loan.
@@ -13,10 +13,12 @@ This tutorial demonstrates the use of Feast as part of a real-time credit scorin
 
 * AWS CLI (v2.2 or later)
 
-Install project specific dependencies
-```
-pip install -r requirements.txt
-```
+* You also need an EC2 instance for setup, training and testing. Please launch an ubuntu instance in the default VPC
+  - Once the instance is created, [Authorize ec2 to access the ElastiCache cluster](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/GettingStarted.AuthorizeAccess.html)
+  - For Troubleshooting login issues on the EC2 instance : [Error connecting to your instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstancesConnecting.html#TroubleshootingInstancesConnectionTimeout)
+
+* Install project specific dependencies
+  - ``` pip install -r requirements.txt ```
 
 ## Setup
 Open a terminal and go to folder ```infra``` by doing
@@ -36,7 +38,7 @@ Once the config has your values, run deploy.sh in your terminal. This will spin 
 ./deploy.sh
 ```
 
-You should see outputs in the cloudformation stack
+You should see output in `Outputs` tab in the cloudformation stack. Please use them below.
 
 Next we create a mapping from the Redshift cluster to the external catalog
 ```
@@ -80,7 +82,7 @@ feast init -t aws feature_repo # Command only shown for reference.
 ```
 
 Since we don't need to `init` a new repository, all we have to do is configure the 
-[feature_store.yaml/](feature_repo/feature_store.yaml) in the feature repository. Please set the fields under `online_store` with the redis endpoint that you got at first step
+[feature_store.yaml/](feature_repo/feature_store.yaml) in the feature repository. Please set the fields under `online_store` with the redis endpoint
 
 `online_store` values will look like this:
 ```
@@ -88,6 +90,7 @@ Since we don't need to `init` a new repository, all we have to do is configure t
     redis_type: redis_cluster
     connection_string: ec-featurestore-cache-xxxxxx.serverless.usw2.cache.amazonaws.com:6379,ssl=true
 ```
+*connection_string* : Refer to `RedisConnectionString` in Cloudformation stack `Outputs` section
 
 Set `offline_store` to the configuration you have received when deploying your Redshift cluster and S3 bucket(you can get this from the Output section of the Cloudformation template).
 
@@ -97,12 +100,18 @@ Set `offline_store` to the configuration you have received when deploying your R
     s3_staging_location: s3://<demo-feast-project-aws-bucket>/* 
     iam_role: arn:aws:iam::<enter-your-account-id>:role/s3_spectrum_role
 ```
+*cluster_id* : Refer to `RedshiftClusterIdentifier` in CloudFormation stack `Outputs`\
+*s3_staging_location* : Refer to `FeastS3BucketUri` in CloudFormation stack `Outputs`\
+*iam_role* : Refer to `RedshiftSpectrumArn` in CloudFormation stack `Outputs`
 
 Deploy the feature store by running `apply` from within the `feature_repo/` folder
 ```
 cd feature_repo/
 feast apply
 ```
+
+If the command is successful, you should see the below output:
+
 ```
 Registered entity dob_ssn
 Registered entity zipcode
@@ -111,6 +120,8 @@ Registered feature view zipcode_features
 Deploying infrastructure for credit_history
 Deploying infrastructure for zipcode_features
 ```
+
+
 
 Next we load features into the online store using the `materialize-incremental` command. This command will load the
 latest feature values from a data source into the online store.
@@ -134,9 +145,11 @@ Finally, we train the model using a combination of loan data from S3 and our zip
 python run.py
 ```
 The script should then output the result of a single loan application
-```
+
+`
 loan rejected!
-```
+`
+
 
 ## Interactive demo (using Streamlit)
 
