@@ -275,10 +275,10 @@ If you choose not to do this, you may incur S3 storage costs.
 
 
 ## Authors ##
-`
+
 **Siva Karuturi**, Senior Specialist Solutions Architect, In-Memory Databases, Amazon Web Services
 **Smita Srivastava**, Database Solutions Architect, Amazon Web Services
-`
+
 ## License ##
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
