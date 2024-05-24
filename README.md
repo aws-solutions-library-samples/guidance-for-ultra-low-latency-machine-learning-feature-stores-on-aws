@@ -22,10 +22,10 @@ We explore how our customers are building online feature stores on AWS with Amaz
 
 We use an open-source feature store framework called Feast that enables the underlying infrastructure for loading features into an offline feature store and materializing features to online feature stores. This is used for model inferencing and accelerating deployment of production-grade feature stores. Feast helps ML environment teams productize their real-time models by making the collaboration between engineers and data scientists more efficient.
 
-#### Architecture overview ####
+### Architecture overview ###
 ![credit-score-architecture@2x](data/architecture.jpeg)
 
-#### Cost ####
+### Cost ###
 
 You are responsible for the cost of the AWS services used while running this Guidance.
 
@@ -39,7 +39,7 @@ As of 05/24/2024, the cost for running this guidance with the default settings i
 | Amazon Simple Storage Service | 10GB data, 1,000 PUT, 1000 GET requests | $0.24 |
 | AWS Glue Data Catalog |  2 objects, and 1 million access requests | $1 |
 | Amazon CloudWatch |   5GB logs storage | $2.52 |
-| AWS Key Management Service |  | $2.52 |
+| AWS Key Management Service | 1 CMK, 1 million symmetric requests x  0.000003 USD  | $4.00 |
 | Amazon VPC | 1 in-use public IPv4 address  x 30 days x 24 hours x $0.005 hourly charge  | $3.6 |
 |   | | $310.06 |
 
@@ -48,7 +48,7 @@ As of 05/24/2024, the cost for running this guidance with the default settings i
 
 This guidance is targeted towards those familiar with the AWS Console and AWS DeepRacer Service. The users are expected to have a basic understanding of AWS DeepRacer, SageMaker, RoboMaker services, and general Machine Learning concepts. It guides users to utilize these services directly to train, and tune their models to a higher level of performance. It should be run in US East N.Virginia region.
 
-#### Operating system ####
+### Operating system ###
 Since the guidance runs in the AWS cloud, on an Amazon Elastic Compute Cloud (EC2) instance, Linux (preferably Amazon Linux 2023 AMI) is recommended. 
 
 * You will need an Amazon Elastic Compute Cloud (EC2) instance for setup, training and testing. Please launch an EC2 instance in the default VPC
@@ -58,11 +58,11 @@ Since the guidance runs in the AWS cloud, on an Amazon Elastic Compute Cloud (EC
 
 * Make sure AWS CLI (v2.2 or later) is installed. 
 
-#### Third party tools ####
+### Third party tools ###
 
 This solution guidance utilizes a popular open source feature store framework called [Feast](https://github.com/feast-dev/feast). This framework will be installed as part of the project specific dependencies listed in the next section. 
 
-#### Project specific dependencies ####
+### Project specific dependencies ###
 
 The following project specific dependencies must be installed on your Amazon EC2 instance prior to executing all project specific tasks. 
 - s3fs
@@ -159,7 +159,7 @@ Return to the root of the credit scoring repository
 cd ..
 ```
 
-#### Setting up Feast ####
+### Setting up Feast ###
 
 We have already set up a feature repository in [feature_repo/](feature_repo/). It isn't necessary to create a new
 feature repository, but it can be done using the following command
@@ -219,7 +219,7 @@ Return to the root of the repository
 cd ..
 ```
 
-#### Train and test the model ####
+### Train and test the model ###
 
 Finally, we train the model using a combination of loan data from S3 and our zipcode and credit history features from Redshift
 (which in turn queries S3), and then execute online inferencing by reading those same features from Amazon ElastiCache.  
@@ -234,7 +234,7 @@ loan rejected!
 `
 
 
-#### Interactive demo (using Streamlit) ####
+### Interactive demo (using Streamlit) ###
 
 Once the credit scoring model has been trained it can be used for interactive loan applications using Streamlit:
 
@@ -256,7 +256,7 @@ For this Solution guidance, you have used AWS CloudFormation template listed in 
 3. Confirm that you want to delete the stack.
 4. Check the CloudFormation console to ensure the stack that you selected is removed.
 
-#### Terminate the Amazon EC2 instance ####
+### Terminate the Amazon EC2 instance ###
 Terminate the Amazon EC2 instance you used for deploying the feature store infrastructure. To terminate an instance using the console
 Open the Amazon EC2 console at https://console.aws.amazon.com/ec2/ LNK.
 
@@ -265,7 +265,7 @@ Open the Amazon EC2 console at https://console.aws.amazon.com/ec2/ LNK.
 3. Choose Terminate when prompted for confirmation.
 After you terminate an instance, it remains visible for a short while, with a state of terminated.
 
-#### Clean up the Amazon S3 buckets ####
+### Clean up the Amazon S3 buckets ###
 
 Visit the  S3 Console  [https://s3.console.aws.amazon.com/s3/buckets] and delete the folowing buckets. Make sure the bucket is empty – You can only delete buckets that don't have any objects in them. 
 1. feast-project-aws-bucket
@@ -275,10 +275,10 @@ If you choose not to do this, you may incur S3 storage costs.
 
 
 ## Authors ##
-
+`
 **Siva Karuturi**, Senior Specialist Solutions Architect, In-Memory Databases, Amazon Web Services
 **Smita Srivastava**, Database Solutions Architect, Amazon Web Services
-
+`
 ## License ##
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
