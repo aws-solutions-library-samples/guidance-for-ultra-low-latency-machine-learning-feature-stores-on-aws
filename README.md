@@ -55,8 +55,8 @@ As of 05/24/2024, the cost for running this guidance with the default settings i
 
 
 ## Prerequisites ##
+This guidance is targeted towards those familiar with the AWS Console. The users are expected to have a basic understanding of Amazon ElastiCache, Amazon Redshift, AWS Glue, and general Machine Learning concepts like feature store.
 
-This guidance is targeted towards those familiar with the AWS Console and AWS DeepRacer Service. The users are expected to have a basic understanding of AWS DeepRacer, SageMaker, RoboMaker services, and general Machine Learning concepts. It guides users to utilize these services directly to train, and tune their models to a higher level of performance. It should be run in US East N.Virginia region.
 
 ### Operating system ###
 Since the guidance runs in the AWS cloud, on an Amazon Elastic Compute Cloud (EC2) instance, Linux (preferably Amazon Linux 2023 AMI) is recommended. 
@@ -66,7 +66,13 @@ Since the guidance runs in the AWS cloud, on an Amazon Elastic Compute Cloud (EC
   - For Troubleshooting login issues on the EC2 instance : [Error connecting to your instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstancesConnecting.html#TroubleshootingInstancesConnectionTimeout)
 
 
-* Make sure AWS CLI (v2.2 or later) is installed. 
+* Make sure AWS CLI (v2.2 or later) is installed. It will be by default be installed on Amazon Linux
+* Install git, python and pip using ```sudo yum install git python pip```
+* configure your aws credentials using ```aws configure``` of the current AWS account.
+* Clone the repository 
+  ```
+  git clone git@github.com:aws-solutions-library-samples/guidance-for-building-ultra-low-latency-online-feature-store-using-amazon-elasticache-for-redis.git
+  ```
 
 ### Third party tools ###
 
@@ -99,7 +105,7 @@ and complete the setup as explained below:
 Set the parameters in ```config``` file. There are three parameters you need to set:
 1. EC_FS_STACK: the stack name
 1. SUBNET_ID: The subnet where the redshift cluster will be created 
-1. PROJECT_NAME: Project name is used in naming s3 buckets and redshift cluster. If you get an error that the s3 bucket exists, just change the PROJECT_NAME to be something unique.
+1. PROJECT_NAME: Project name is used in naming s3 buckets and redshift cluster.
 
 Once the config has your values, run deploy.sh in your terminal. This will spin up the required resources in 'us-west-2' account
 

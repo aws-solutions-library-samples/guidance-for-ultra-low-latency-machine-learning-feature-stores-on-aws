@@ -5,7 +5,10 @@ set -ux
 # read the configuration file to load variables into this shell script
 source config
 
-export FEAST_BUCKET_NAME="${PROJECT_NAME}-bucket"
+#add random
+export random_str=`date +%s`
+
+export FEAST_BUCKET_NAME="${PROJECT_NAME}-bucket-${random_str}"
 
 # 2) 
 echo "Checking if the stack exist"
@@ -18,8 +21,23 @@ if ! aws cloudformation describe-stacks --stack-name $EC_FS_STACK  --region "us-
                 --parameters \
                         ParameterKey=pAdminPassword,ParameterValue="thisISyourPassword1" \
                         ParameterKey=pProjectName,ParameterValue=$PROJECT_NAME \
-                        ParameterKey=pRedshiftSubnetGroup,ParameterValue=$SUBNET_ID
+                        ParameterKey=pRedshiftSubnetGroup,ParameterValue=$SUBNET_ID \
+                        ParameterKey=pFeastBucketName,ParameterValue=$FEAST_BUCKET_NAME
 
+        sleep 60s
+
+        aws s3api put-object --bucket $FEAST_BUCKET_NAME \
+                --key "zipcode_table/table.parquet" \
+                --body "../data/zipcode_table.parquet"
+
+
+        aws s3api put-object --bucket $FEAST_BUCKET_NAME \
+                --key "credit_history/table.parquet" \
+                --body "../data/credit_history.parquet"
+
+        aws s3api put-object --bucket $FEAST_BUCKET_NAME \
+                --key "loan_features/table.parquet" \
+                --body "../data/loan_table.parquet"
 else
         aws cloudformation update-stack \
                 --stack-name $EC_FS_STACK \
@@ -29,20 +47,6 @@ else
                 --parameters \
                         ParameterKey=pAdminPassword,ParameterValue="thisISyourPassword1" \
                         ParameterKey=pProjectName,ParameterValue=$PROJECT_NAME \
-                        ParameterKey=pRedshiftSubnetGroup,ParameterValue=$SUBNET_ID
+                        ParameterKey=pRedshiftSubnetGroup,ParameterValue=$SUBNET_ID \
+                        ParameterKey=pFeastBucketName,UsePreviousValue=true
 fi
-
-sleep 60s
-
-aws s3api put-object --bucket $FEAST_BUCKET_NAME \
-        --key "zipcode_table/table.parquet" \
-        --body "../data/zipcode_table.parquet"
-
-
-aws s3api put-object --bucket $FEAST_BUCKET_NAME \
-        --key "credit_history/table.parquet" \
-        --body "../data/credit_history.parquet"
-
-aws s3api put-object --bucket $FEAST_BUCKET_NAME \
-        --key "loan_features/table.parquet" \
-        --body "../data/loan_table.parquet"
