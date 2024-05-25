@@ -25,6 +25,16 @@ We use an open-source feature store framework called Feast that enables the unde
 ### Architecture overview ###
 ![credit-score-architecture@2x](data/architecture.jpeg)
 
+1. Setup data infrastructure to deploy Amazon Redshift, an Amazon Simple Storage Service (S3) bucket containing zipcode and credit history parquet files, AWS Identity and Access Management (IAM) roles and policies for Redshift to access Amazon S3, and create a Redshift table that can query the parquet files.
+2. Deploy Feast infrastructure
+3. Create a Feature Store Repository and configure Amazon ElastiCache as online feature store and Amazon Redshift as offline feature store. Create feature definitions in this step. 
+4. Register the feature definitions along with the underlying infrastructure into a Feast registry using Feast SDK
+5. Generate training data using features and labels from the Data and features from Feast. The features from Feast enrich the historical data and create a Feature DataFrame
+6. Train the ML model using the training dataset and a model trainer. 
+7. Ingest batch features into the Amazon ElastiCache online feature store. These online features are used to make online predictions with our trained model
+8. Read Feature Vector from Amazon ElastiCache for making loan predictions
+9. Use Amazon Key Management Service (KMS) to encrypt ElastiCache data at rest
+
 ### Cost ###
 
 You are responsible for the cost of the AWS services used while running this Guidance.
