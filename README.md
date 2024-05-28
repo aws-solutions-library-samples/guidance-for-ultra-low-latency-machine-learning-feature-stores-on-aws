@@ -11,7 +11,10 @@
 3. [Deployment Steps](#Deployment-Steps)
 4. [Deployment Validation](#Deployment-Validation)
 5. [Running the Guidance](#Running-the-Guidance)
-6. [Cleanup](#Cleanup)
+6. [Next Steps](#Next-Steps)
+7. [Cleanup](#Cleanup)
+8. [Notices](#Notices)
+9. [Authors](#Authors)
 
 
 ## Overview
@@ -298,15 +301,16 @@ Visit the  S3 Console  [https://s3.console.aws.amazon.com/s3/buckets] and delete
 
 If you choose not to do this, you may incur S3 storage costs.
 
+
+## Notices ##
+
+Customers are responsible for making their own independent assessment of the information in this Guidance. This Guidance: (a) is for informational purposes only, (b) represents AWS current product offerings and practices, which are subject to change without notice, and (c) does not create any commitments or assurances from AWS and its affiliates, suppliers or licensors. AWS products or services are provided “as is” without warranties, representations, or conditions of any kind, whether express or implied. AWS responsibilities and liabilities to its customers are controlled by AWS agreements, and this Guidance is not part of, nor does it modify, any agreement between AWS and its customers.
+
 ## Authors ##
 
 **Siva Karuturi**, Senior Specialist Solutions Architect, In-Memory Databases, Amazon Web Services
 
 **Smita Srivastava**, Database Solutions Architect, Amazon Web Services
-
-## Notices ##
-
-Customers are responsible for making their own independent assessment of the information in this Guidance. This Guidance: (a) is for informational purposes only, (b) represents AWS current product offerings and practices, which are subject to change without notice, and (c) does not create any commitments or assurances from AWS and its affiliates, suppliers or licensors. AWS products or services are provided “as is” without warranties, representations, or conditions of any kind, whether express or implied. AWS responsibilities and liabilities to its customers are controlled by AWS agreements, and this Guidance is not part of, nor does it modify, any agreement between AWS and its customers.
 
 ## License ##
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
