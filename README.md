@@ -59,7 +59,7 @@ This guidance is targeted towards those familiar with the AWS Console. The users
 
 
 ### Operating system ###
-Since the guidance runs in the AWS cloud, on an Amazon Elastic Compute Cloud (EC2) instance, Linux (preferably Amazon Linux 2023 AMI) is recommended. 
+Since the guidance runs in the AWS cloud, on an Amazon Elastic Compute Cloud (EC2) instance (t3.medium or higher), Linux (preferably Amazon Linux 2023 AMI) is recommended. 
 
 * You will need an Amazon Elastic Compute Cloud (EC2) instance for setup, training and testing. Please launch an EC2 instance in the default VPC
   - Once the instance is created, [Authorize ec2 to access the ElastiCache cluster](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/GettingStarted.AuthorizeAccess.html). The port range(6379-6380) needs to be specified in the inbound rule of the security group attached to the ElastiCache serverless cluster to allow connection request from the ec2 instance security group.
@@ -264,6 +264,14 @@ Then navigate to the URL on which Streamlit is being served. You should see a us
 ![Streamlit Loan Application](data/streamlit.png)
 
 
+## Next Steps ##
+
+### Keeping data on the Online feature store up to date ###
+
+To keep your online store up to date, you need to run a materialization process that loads feature data from your feature view sources into your online feature store.
+A key command to use in Feast is the `materialize_incremental` command, which fetches the latest values for all entities from the source and ingests these values into the online store. Materialization can be called programmatically or through the CLI. To ensure fresh features, you'll want to schedule materialization jobs regularly. This can be as simple as running a cron job that calls `feast materialize-incremental`.
+
+
 ## Cleanup ##
 Deprovision resources so your account does not continue to be charged after completing the workshop.
 For this Solution guidance, you have used AWS CloudFormation template listed in the Deployment Steps section you can clean up resources by deleting the CloudFormation stack:
@@ -290,12 +298,15 @@ Visit the  S3 Console  [https://s3.console.aws.amazon.com/s3/buckets] and delete
 
 If you choose not to do this, you may incur S3 storage costs.
 
-
 ## Authors ##
 
 **Siva Karuturi**, Senior Specialist Solutions Architect, In-Memory Databases, Amazon Web Services
 
 **Smita Srivastava**, Database Solutions Architect, Amazon Web Services
+
+## Notices ##
+
+Customers are responsible for making their own independent assessment of the information in this Guidance. This Guidance: (a) is for informational purposes only, (b) represents AWS current product offerings and practices, which are subject to change without notice, and (c) does not create any commitments or assurances from AWS and its affiliates, suppliers or licensors. AWS products or services are provided “as is” without warranties, representations, or conditions of any kind, whether express or implied. AWS responsibilities and liabilities to its customers are controlled by AWS agreements, and this Guidance is not part of, nor does it modify, any agreement between AWS and its customers.
 
 ## License ##
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
