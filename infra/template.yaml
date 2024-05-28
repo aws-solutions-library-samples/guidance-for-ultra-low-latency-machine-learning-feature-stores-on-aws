@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Creates infrastructure for feature store
+Description: Solution ID:SO9445
 
 Parameters:
   pProjectName:

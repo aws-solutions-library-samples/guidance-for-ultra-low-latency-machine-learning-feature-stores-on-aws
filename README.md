@@ -62,7 +62,7 @@ This guidance is targeted towards those familiar with the AWS Console. The users
 Since the guidance runs in the AWS cloud, on an Amazon Elastic Compute Cloud (EC2) instance, Linux (preferably Amazon Linux 2023 AMI) is recommended. 
 
 * You will need an Amazon Elastic Compute Cloud (EC2) instance for setup, training and testing. Please launch an EC2 instance in the default VPC
-  - Once the instance is created, [Authorize ec2 to access the ElastiCache cluster](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/GettingStarted.AuthorizeAccess.html)
+  - Once the instance is created, [Authorize ec2 to access the ElastiCache cluster](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/GettingStarted.AuthorizeAccess.html). The port range(6379-6380) needs to be specified in the inbound rule of the security group attached to the ElastiCache serverless cluster to allow connection request from the ec2 instance security group.
   - For Troubleshooting login issues on the EC2 instance : [Error connecting to your instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/TroubleshootingInstancesConnecting.html#TroubleshootingInstancesConnectionTimeout)
 
 
@@ -142,7 +142,7 @@ To validate that your AWS CloudFormation stack and the feature store infrastruct
 
 To run the guidance for building ultra low latency online feature store using Amazon ElastiCache follow the steps below: 
 
-Create a mapping from the Redshift cluster to the external catalog. For this step, please refer to the output of CloudFormation Stack to get the Redshift Cluster indentifier. Use the Redshift Cluster ID in the below AWS CLI command and execute it. 
+Create a mapping from the Redshift cluster to the external catalog. For this step, please refer to the output of CloudFormation Stack to get the **Redshift Cluster indentifier** and the **spectrum role arn** and execute the below CLI command.
 ```
 aws redshift-data execute-statement \
     --region us-west-2 \
@@ -170,9 +170,9 @@ which should print out results by running
 aws redshift-data get-statement-result --id "SET YOUR STATEMENT ID HERE" --region "us-west-2"
 ```
 
-Return to the root of the credit scoring repository
+Once you see some data, go to the feature_repo folder to set up feast
 ```
-cd ..
+cd ../feature_repo
 ```
 
 ### Setting up Feast ###
@@ -184,7 +184,9 @@ feast init -t aws feature_repo # Command only shown for reference.
 ```
 
 Since we don't need to `init` a new repository, all we have to do is configure the 
-[feature_store.yaml/](feature_repo/feature_store.yaml) in the feature repository. Please set the fields under `online_store` with the redis endpoint
+[feature_store.yaml/](feature_repo/feature_store.yaml) in the feature repository. Open `feature_store.yaml` in your favourite editor and change the fields as described below:
+
+Please set the fields under `online_store` with the redis endpoint
 
 `online_store` values will look like this:
 ```
@@ -208,7 +210,6 @@ Set `offline_store` to the configuration you have received when deploying your R
 
 Deploy the feature store by running `apply` from within the `feature_repo/` folder
 ```
-cd feature_repo/
 feast apply
 ```
 
@@ -223,7 +224,7 @@ If the command is successful, you should see the below output:
 ```
 
 Next we load features into the online store using the `materialize-incremental` command. This command will load the
-latest feature values from a data source into the online store.
+latest feature values from a data source into the online store. Please be sure that you [Authorize ec2 instance to access the ElastiCache cluster](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/GettingStarted.AuthorizeAccess.html).The port range(6379-6380) needs to be specified in the inbound rule of the security group attached to the ElastiCache serverless cluster to allow connection request from the ec2 instance security group.
 
 ```
 CURRENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%S")

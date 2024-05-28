@@ -1,3 +1,4 @@
+# All the variables you can get from the Outputs section of the CloudFormation stack
 project: credit_scoring_aws
 registry: registry.db
 provider: aws
@@ -8,9 +9,9 @@ online_store:
 entity_key_serialization_version: 2
 offline_store:
     type: redshift
-    cluster_id: demo-feast-project-aws-redshift-cluster
+    cluster_id: <put your redshift cluster identifier here>
     region: us-west-2
     user: admin
     database: dev
-    s3_staging_location: s3://demo-feast-project-aws-bucket/*
+    s3_staging_location: s3://<put your s3 location here>/*
     iam_role: arn:aws:iam::<enter-your-account-id>:role/s3_spectrum_role
