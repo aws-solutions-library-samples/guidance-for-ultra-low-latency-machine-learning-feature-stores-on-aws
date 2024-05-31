@@ -310,7 +310,7 @@ Customers are responsible for making their own independent assessment of the inf
 
 **Siva Karuturi**, Senior Specialist Solutions Architect, In-Memory Databases, Amazon Web Services
 
-**Smita Srivastava**, Database Solutions Architect, Amazon Web Services
+**Smita Srivastava**, Solutions Architect, Amazon Web Services
 
 ## License ##
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
