@@ -1,4 +1,4 @@
-# Guidance for building ultra low latency online feature store using Amazon ElastiCache
+# Guidance for Ultra Low Latency Machine Leaning Feature Stores on AWS
 
 ## Table of Content 
 
@@ -26,7 +26,7 @@ We explore how our customers are building online feature stores on AWS with Amaz
 We use an open-source feature store framework called Feast that enables the underlying infrastructure for loading features into an offline feature store and materializing features to online feature stores. This is used for model inferencing and accelerating deployment of production-grade feature stores. Feast helps ML environment teams productize their real-time models by making the collaboration between engineers and data scientists more efficient.
 
 ### Architecture overview ###
-![credit-score-architecture@2x](data/architecture.jpeg)
+![credit-score-architecture@2x](data/ultra-low-latency-features-stores-with-aws-machine-learning-ml.png)
 
 1. Setup data infrastructure to deploy Amazon Redshift, an Amazon Simple Storage Service (S3) bucket containing zipcode and credit history parquet files, AWS Identity and Access Management (IAM) roles and policies for Redshift to access Amazon S3, and create a Redshift table that can query the parquet files.
 2. Deploy Feast infrastructure
