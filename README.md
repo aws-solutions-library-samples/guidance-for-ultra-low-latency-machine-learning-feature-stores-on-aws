@@ -1,4 +1,4 @@
-# Guidance for Ultra Low Latency Machine Leaning Feature Stores on AWS
+# Guidance for Ultra Low Latency Machine Learning Feature Stores on AWS
 
 ## Table of Content 
 
