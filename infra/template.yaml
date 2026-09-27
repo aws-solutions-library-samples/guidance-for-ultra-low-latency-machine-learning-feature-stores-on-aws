@@ -87,6 +87,17 @@ Resources:
             Resource:
               - !Sub '${LoggingBucket.Arn}'
               - !Sub '${LoggingBucket.Arn}/*'
+          -
+            Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !Sub '${LoggingBucket.Arn}'
+              - !Sub '${LoggingBucket.Arn}/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
   
   FeastS3Bucket:
     Type: AWS::S3::Bucket
